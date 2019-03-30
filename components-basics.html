@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+<body>
+    <h1>1. 组件初始化</h1>
+    <hr>
+    <div id="component-demo-1">
+        <button-counter></button-counter>
+        <button-counter></button-counter>
+    </div>
+    <script>
+        // 注册组件
+        Vue.component('button-counter', {
+            // data 必须是一个函数
+            data: function () {
+                return {
+                    count: 0
+                }
+            },
+            template: `
+            <button 
+            v-on:click="count ++"
+            > 
+            you click me {{ count }} times 
+        </button>
+        `
+    })
+    
+    // 绑定 id 初始化一个 Vue 实例
+    new Vue({
+        el: '#component-demo-1'
+    })
+</script>
+<h1>2. 父组件通过 props 向子组件传递数据</h1>
+<hr>
+<h2>2.1 Demo2: </h2>
+<div id="component-demo-2">
+    <blog-post-demo-1
+    v-for="post of posts"
+    v-bind:key="post.id"
+    v-bind:title="post.title"
+    ></blog-post-demo-1>
+</div>
+<script>
+    Vue.component('blog-post-demo-1', {
+        props: ['title'],
+        template: `
+        <h3> {{ title }}</h3> 
+        `
+    })
+    new Vue({
+        el: '#component-demo-2',
+        data: {
+            posts: [
+            { id: 0, title: 'My journey with Vue'}, 
+            { id: 1, title: 'Blogging with Vue'},
+            { id: 2, title: 'My Vue is so fun'}
+            ]
+        }
+    })
+</script>
+<h2>2.2 Demo3: </h2>
+<div id="component-demo-3">
+    <blog-post-demo-3
+    v-for="post of posts"
+    v-bind:key="post.id"
+    v-bind:post="post"
+    ></blog-post-demo-3>
+</div>
+<script>
+    Vue.component('blog-post-demo-3', {
+        props: ['post'],
+        template: `
+        <div class="blog-post">
+            <h3>{{ post.id }} -- {{ post.title }}</h3>
+            <div v-html="post.content"></div>
+        </div>
+        `
+    })
+    
+    new Vue({
+        el: '#component-demo-3',
+        data: {
+            posts: [
+            { id: 0, title: 'My journey with Vue', content: '\<p\>...\<\/p\>'}, 
+            { id: 1, title: 'Blogging with Vue', content: '\<p\>...\<\/p\>'},
+            { id: 2, title: 'My Vue is so fun',content: '\<p\>...\<\/p\>' }
+            ]
+        }
+    })
+</script>
+<!-- Demo 4 -->
+<h2>2.3 Demo 4 </h2>
+<div id="component-demo-4">
+    <div :style="{ fontSize: postFontSize + 'em' }">
+        <blog-post-demo-4
+        v-for="post of posts"
+        v-bind:post="post"
+        v-bind:key="post.id"
+        v-bind:amount="amount"
+        v-on:enlarge-text="onEnlargeText"
+        ></blog-post-demo-4>
+    </div>
+</div>
+<script>
+    Vue.component('blog-post-demo-4', {
+        props: ['post', 'amount'],
+        template: `
+        <div class="blog-post">
+            <h3>{{ post.id }} -- {{ post.title }}</h3>
+            <button v-on:click="$emit(\'enlarge-text\', amount)">Enlarge content</button>
+            <div v-html="post.content"></div>
+        </div>        `
+    })
+    new Vue({
+        el: '#component-demo-4',
+        data: {
+            postFontSize: 1,
+            amount: 0.1,
+            posts: [
+            { id: 0, title: 'My journey with Vue', content: '\<p\>...\<\/p\>'}, 
+            { id: 1, title: 'Blogging with Vue', content: '\<p\>...\<\/p\>'},
+            { id: 2, title: 'My Vue is so fun',content: '\<p\>...\<\/p\>' }
+            ]
+        },
+        methods: {
+            onEnlargeText: function(amount) {
+                this.postFontSize += amount;                
+            }
+        }
+    })
+</script>
+<!-- Demo 5 -->
+<h2>2.4 Demo 5: 在组件中使用 v-model </h2>
+<div id="component-demo-5">
+    <custom-input
+        v-model="searchText" 
+    ></custom-input>
+    <p> {{ searchText }} </p>
+</div>
+<script>
+    Vue.component('custom-input', {
+        props: ['value'],
+        template: `
+            <div class="custom-input">
+                <input 
+                    v-bind:value="value"
+                    v-on:input="$emit('input', $event.target.value)"
+                >
+            </div>
+        `
+    })
+    new Vue({
+        el: '#component-demo-5',
+        data: {
+            searchText: ''
+        }
+    })
+</script>
+<!-- Demo 6 -->
+<h2>2.5 Demo 6: 动态组件 </h2>
+<style>
+        .tab-button {
+            padding: 6px 10px;
+            border-top-left-radius: 3px;
+            border-top-right-radius: 3px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            background: #f0f0f0;
+            margin-bottom: -1px;
+            margin-right: -1px;
+        }
+        .tab-button:hover {
+            background: #e0e0e0;
+        }
+        .tab-button.active {
+            background: #e0e0e0;
+        }
+        .tab {
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+</style>
+<div id="component-demo-6">
+    <button
+        v-for="tab of tabs"
+        v-bind:key="tab"
+        v-bind:class="['tab-button', {active : currentTab === tab}]"
+        v-on:click="currentTab = tab"
+    >
+        {{ tab }}
+    </button>
+
+    <component
+        v-bind:is="currentTabComponent"
+        class="tab"
+    >
+        
+    </component>
+</div>
+<script>
+    Vue.component('tab-home', {
+        template: `<div>Home component</div>`
+    })
+    Vue.component('tab-post', {
+        template: `<div>Post component</div>`
+    })
+    Vue.component('tab-archive', {
+        template: `<div>Archive component</div>`
+    })
+    new Vue({
+        el: '#component-demo-6',
+        data: {
+            tabs: ['Home', 'Post', 'Archive'],
+            currentTab: 'Home'
+        },
+        computed: {
+            currentTabComponent: function () {
+                return 'tab-' + this.currentTab.toLowerCase()
+            }
+        }
+    })
+</script>
+</body>
+</html>
