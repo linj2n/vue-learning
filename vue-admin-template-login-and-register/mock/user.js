@@ -25,6 +25,12 @@ const users = {
 }
 
 export default {
+  register: res => {
+    return {
+      code: 20000,
+      message: '激活邮件已发送'
+    }
+  },
   login: res => {
     const { username } = JSON.parse(res.body)
     const data = tokens[username]
